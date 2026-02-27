@@ -6,23 +6,38 @@ defmodule Life.Worker do
   """
 
   def start_link({height, width}) do
-    GenServer.start_link(__MODULE__, {height, width}, name: __MODULE__)
+    start_link(height: height, width: width, name: __MODULE__)
+  end
+
+  def start_link(opts) when is_list(opts) do
+    height = Keyword.fetch!(opts, :height)
+    width = Keyword.fetch!(opts, :width)
+    name = Keyword.get(opts, :name, __MODULE__)
+    boundary = Keyword.get(opts, :boundary, Life.Worker.DefaultBoundary)
+    tick_ms = Keyword.get(opts, :tick_ms, 1000)
+
+    GenServer.start_link(
+      __MODULE__,
+      %{height: height, width: width, boundary: boundary, tick_ms: tick_ms},
+      name: name
+    )
   end
 
   @impl true
-  def init({height, width}) do
-    initial_state = Life.Core.new(height, width)
-    schedule_tick()
-    {:ok, initial_state}
+  def init(%{height: height, width: width, boundary: boundary, tick_ms: tick_ms}) do
+    core_state = boundary.new(height, width)
+    boundary.schedule_tick(self(), tick_ms)
+    {:ok, %{core_state: core_state, boundary: boundary, tick_ms: tick_ms}}
   end
 
   @impl true
-  def handle_info(:tick, state) do
-    new_state = Life.Core.evolve(state)
-    IO.puts(Life.Core.to_string(new_state))
-    schedule_tick()
-    {:noreply, new_state}
+  def handle_info(
+        :tick,
+        %{core_state: state, boundary: boundary, tick_ms: tick_ms} = worker_state
+      ) do
+    new_state = boundary.evolve(state)
+    new_state |> boundary.render() |> boundary.publish()
+    boundary.schedule_tick(self(), tick_ms)
+    {:noreply, %{worker_state | core_state: new_state}}
   end
-
-  defp schedule_tick, do: Process.send_after(self(), :tick, 1000)
 end

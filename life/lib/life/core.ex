@@ -5,6 +5,8 @@ defmodule Life.Core do
 
   defstruct height: 0, width: 0, cells: %{}
 
+  @type t :: %__MODULE__{height: non_neg_integer(), width: non_neg_integer(), cells: map()}
+
   @doc """
   Creates a new Life.Core struct with the given height and width.
   Also initializes a map of cells to a group of cells randomly set to alive or dead.
