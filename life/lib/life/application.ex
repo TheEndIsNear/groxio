@@ -8,9 +8,8 @@ defmodule Life.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Life.Worker.start_link(arg)
-      # Start the Life.Worker with a 5x5 grid
-      {Life.Worker, {5, 5}}
+      {Life.Worker, {5, 5}},
+      {Life.Queue, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
