@@ -8,7 +8,7 @@ defmodule LifeWeb.GameOfLife do
   """
 
   @type cell :: {non_neg_integer(), non_neg_integer()}
-  @type grid :: MapSet.t(cell())
+  @type grid :: MapSet.t()
 
   @doc """
   Creates a random grid of the given dimensions.
@@ -27,8 +27,11 @@ defmodule LifeWeb.GameOfLife do
   @doc """
   Returns an empty grid.
   """
+  @dialyzer {:nowarn_function, empty_grid: 0}
   @spec empty_grid() :: grid()
-  def empty_grid, do: MapSet.new()
+  def empty_grid do
+    MapSet.new()
+  end
 
   @doc """
   Evolves the grid by one generation according to Conway's rules

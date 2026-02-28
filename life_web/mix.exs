@@ -11,7 +11,13 @@ defmodule LifeWeb.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      dialyzer: [
+        plt_add_apps: [:ex_unit],
+        plt_file:
+          {:no_warn,
+           "_build/dev/dialyxir_erlang-#{System.otp_release()}_elixir-#{System.version()}_deps-dev.plt"}
+      ]
     ]
   end
 
@@ -60,7 +66,10 @@ defmodule LifeWeb.MixProject do
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:igniter, "~> 0.7.2"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -80,7 +89,14 @@ defmodule LifeWeb.MixProject do
         "esbuild life_web --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "deps.unlock --unused",
+        "format",
+        "test",
+        "credo --strict",
+        "dialyzer"
+      ]
     ]
   end
 end

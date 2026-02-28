@@ -12,7 +12,9 @@ mix test                   # Run all tests
 mix test test/path.exs     # Run a single test file
 mix test test/path.exs:42  # Run a single test at line 42
 mix test --failed          # Re-run previously failed tests
-mix precommit              # Compile (warnings-as-errors) + unlock unused deps + format + test
+mix credo --strict         # Static analysis (style + consistency)
+mix dialyzer               # Type checking (first run builds PLT — slow)
+mix precommit              # Compile (warnings-as-errors) + unlock unused deps + format + test + credo --strict + dialyzer
 ```
 
 Always run `mix precommit` when finished with all changes and fix any issues before considering work complete.
