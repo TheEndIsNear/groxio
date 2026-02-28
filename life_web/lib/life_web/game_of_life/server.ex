@@ -72,6 +72,9 @@ defmodule LifeWeb.GameOfLife.Server do
   @doc "Clears the grid."
   def clear(server), do: GenServer.cast(server, :clear)
 
+  @doc "Loads a named pattern centered on the grid."
+  def load_pattern(server, pattern_key), do: GenServer.cast(server, {:load_pattern, pattern_key})
+
   # --- Callbacks ---
 
   @impl true
@@ -193,6 +196,26 @@ defmodule LifeWeb.GameOfLife.Server do
 
     broadcast(state)
     {:noreply, state}
+  end
+
+  def handle_cast({:load_pattern, pattern_key}, state) do
+    case GameOfLife.place_pattern(pattern_key, state.rows, state.cols) do
+      {:ok, grid} ->
+        state = cancel_timer(state)
+
+        state = %{
+          state
+          | grid: grid,
+            generation: 0,
+            running: false
+        }
+
+        broadcast(state)
+        {:noreply, state}
+
+      :error ->
+        {:noreply, state}
+    end
   end
 
   @impl true
